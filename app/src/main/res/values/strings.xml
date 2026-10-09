@@ -1,0 +1,116 @@
+<resources>
+    <!-- App name -->
+    <string name="app_name">BatteryNotifier</string>
+    <string name="brand_name">BatteryNotifier</string>
+    <string name="subtitle">Monitor de Batería Inteligente</string>
+
+    <!-- General -->
+    <string name="settings_title">Configuración</string>
+    <string name="settings_open">Abrir ajustes</string>
+    <string name="back">Volver</string>
+    <string name="expand">Expandir</string>
+    <string name="collapse">Colapsar</string>
+
+    <!-- Battery Status -->
+    <string name="status_charging">Cargando</string>
+    <string name="status_discharging">Descargando</string>
+    <string name="battery_level_label">Nivel de batería</string>
+    <string name="remaining_time">Tiempo restante: %s</string>
+    <string name="unknown_time">Desconocido</string>
+
+    <!-- Thresholds -->
+    <string name="level_green">Normal</string>
+    <string name="level_warning">Advertencia</string>
+    <string name="level_critical">Crítico</string>
+    <string name="level_emergency">Emergencia</string>
+
+    <string name="configured_thresholds">Umbrales configurados</string>
+    <string name="next_threshold">Próximo umbral</string>
+    <string name="threshold_will_trigger">se activará al llegar</string>
+    <string name="threshold_active">ACTIVO</string>
+    <string name="thresholds_title">Umbrales de notificación</string>
+    <string name="thresholds_desc">Configura cuándo y cómo quieres que te avise</string>
+
+    <!-- Alert Types -->
+    <string name="alert_type">Tipo de alerta</string>
+    <string name="alert_type_normal">Normal</string>
+    <string name="alert_type_invasive_1">Invasivo 1</string>
+    <string name="alert_type_invasive_3">Invasivo 3</string>
+    <string name="alert_normal_desc">Solo aparece en la barra de notificaciones</string>
+    <string name="alert_invasive_1_desc">Aparece en notificaciones y en medio de la pantalla con sonido y vibración</string>
+    <string name="alert_invasive_3_desc">Igual que Invasivo 1 pero notificaciones continuas cada 1% hasta conectar cargador</string>
+
+    <!-- Settings -->
+    <string name="notifications_enabled">Notificaciones activas</string>
+    <string name="notifications_enabled_desc">Activa o desactiva todos los avisos de batería</string>
+    <string name="sound_type">Tipo de sonido</string>
+    <string name="sound_default">Por defecto</string>
+    <string name="sound_silent">Silencioso</string>
+    <string name="sound_custom">Personalizado</string>
+    <string name="vibrate">Vibrar</string>
+    <string name="priority">Prioridad</string>
+    <string name="priority_low">Baja</string>
+    <string name="priority_normal">Normal</string>
+    <string name="priority_high">Alta</string>
+    <string name="priority_max">Máxima</string>
+    <string name="persistent_notification">Notificación persistente</string>
+    <string name="persistent_notification_desc">Mantén una notificación visible con el nivel actual</string>
+    <string name="always_monitoring">Monitorización continua</string>
+    <string name="always_monitoring_desc">Mantén el servicio activo en segundo plano</string>
+    <string name="test_notification">Probar notificación</string>
+    <string name="reset_defaults">Restablecer valores por defecto</string>
+
+    <string name="ongoing_notification">Notificación persistente</string>
+    <string name="ongoing_notification_desc">Muestra el nivel de batería en la barra de notificaciones</string>
+
+    <string name="auto_start_on_boot">Iniciar al encender el dispositivo</string>
+    <string name="auto_start_on_boot_desc">Reanuda la monitorización automáticamente tras reiniciar el teléfono</string>
+
+    <string name="select_custom_sound">Seleccionar archivo de sonido</string>
+    <string name="browse">Examinar</string>
+
+    <string name="quick_actions_title">Accesos rápidos a ajustes del sistema</string>
+    <string name="notification_settings">Notificaciones de la app</string>
+    <string name="notification_settings_desc">Gestionar permisos y categorías</string>
+    <string name="sound_settings">Sonido y vibración</string>
+    <string name="sound_settings_desc">Volumen, tonos, vibración del sistema</string>
+    <string name="battery_saver_settings">Ahorro de batería</string>
+    <string name="battery_saver_settings_desc">Optimizar consumo en segundo plano</string>
+    <string name="notification_access_settings">Acceso a notificaciones</string>
+    <string name="notification_access_settings_desc">Permitir notificaciones invasivas (pantalla completa)</string>
+
+<string name="settings_short">Ajustes</string>
+
+    <!-- Notifications -->
+    <string name="channel_ongoing_name">Estado de batería</string>
+    <string name="channel_ongoing_desc">Notificación persistente con el nivel actual de batería</string>
+    <string name="channel_test_name">Prueba</string>
+    <string name="channel_test_desc">Notificaciones de prueba para verificar sonido y vibración</string>
+    <string name="channel_threshold_name">Umbral %1$d%%</string>
+    <string name="channel_threshold_desc" formatted="false">Notificación al llegar al %1$d% de batería</string>
+
+    <string name="notif_threshold_title">Batería al %1$d%% (%2$s)</string>
+    <string name="notif_threshold_body">Nivel actual: %1$d%% · Tiempo estimado: %2$s</string>
+    <string name="notif_ongoing_title">Batería: %s</string>
+    <string name="notif_ongoing_text">%1$d%% · %2$s restantes</string>
+    <string name="notif_test_title">Prueba de notificación</string>
+    <string name="notif_test_body">Umbral %1$d%% (%2$s)\n%3$s</string>
+    <string name="notif_test_silent">Sonido: Silencioso</string>
+    <string name="notif_test_with_sound">Sonido: Con sonido</string>
+
+    <!-- Full Screen Alert -->
+    <string name="alert_battery_low_title">¡BATERÍA BAJA!</string>
+    <string name="alert_battery_at">Batería al %d%%</string>
+    <string name="alert_battery_message">Conecta el cargador para evitar que el dispositivo se apague</string>
+    <string name="connect_charger">Conectar cargador</string>
+
+    <!-- Silent only -->
+    <string name="silent_only">Solo silencioso</string>
+    <string name="silent">Silencioso</string>
+    <string name="with_sound">Con sonido</string>
+    <string name="persistent">Persistente</string>
+
+    <!-- Service -->
+    <string name="service_title">BatteryNotifier</string>
+    <string name="service_monitoring">Monitorizando batería en segundo plano</string>
+</resources>

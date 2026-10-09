@@ -1,0 +1,116 @@
+<resources>
+    <!-- App name -->
+    <string name="app_name">BatteryNotifier</string>
+    <string name="brand_name">BatteryNotifier</string>
+    <string name="subtitle">Smart Battery Monitor</string>
+
+    <!-- General -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_open">Open settings</string>
+    <string name="back">Back</string>
+    <string name="expand">Expand</string>
+    <string name="collapse">Collapse</string>
+
+    <!-- Battery Status -->
+    <string name="status_charging">Charging</string>
+    <string name="status_discharging">Discharging</string>
+    <string name="battery_level_label">Battery Level</string>
+    <string name="remaining_time">Time remaining: %s</string>
+    <string name="unknown_time">Unknown</string>
+
+    <!-- Thresholds -->
+    <string name="level_green">Normal</string>
+    <string name="level_warning">Warning</string>
+    <string name="level_critical">Critical</string>
+    <string name="level_emergency">Emergency</string>
+
+    <string name="configured_thresholds">Configured thresholds</string>
+    <string name="next_threshold">Next threshold</string>
+    <string name="threshold_will_trigger">will trigger at</string>
+    <string name="threshold_active">ACTIVE</string>
+    <string name="thresholds_title">Notification thresholds</string>
+    <string name="thresholds_desc">Configure when and how you want to be notified</string>
+
+    <!-- Alert Types -->
+    <string name="alert_type">Alert type</string>
+    <string name="alert_type_normal">Normal</string>
+    <string name="alert_type_invasive_1">Invasive 1</string>
+    <string name="alert_type_invasive_3">Invasive 3</string>
+    <string name="alert_normal_desc">Only appears in notification bar</string>
+    <string name="alert_invasive_1_desc">Appears in notifications and full-screen with sound and vibration</string>
+    <string name="alert_invasive_3_desc">Same as Invasive 1 but continuous alerts every 1% until charging</string>
+
+    <!-- Settings -->
+    <string name="notifications_enabled">Notifications enabled</string>
+    <string name="notifications_enabled_desc">Enable or disable all battery alerts</string>
+    <string name="sound_type">Sound type</string>
+    <string name="sound_default">Default</string>
+    <string name="sound_silent">Silent</string>
+    <string name="sound_custom">Custom</string>
+    <string name="vibrate">Vibrate</string>
+    <string name="priority">Priority</string>
+    <string name="priority_low">Low</string>
+    <string name="priority_normal">Normal</string>
+    <string name="priority_high">High</string>
+    <string name="priority_max">Max</string>
+    <string name="persistent_notification">Persistent notification</string>
+    <string name="persistent_notification_desc">Keep a visible notification with current level</string>
+    <string name="always_monitoring">Continuous monitoring</string>
+    <string name="always_monitoring_desc">Keep service active in background</string>
+    <string name="test_notification">Test notification</string>
+    <string name="reset_defaults">Reset to defaults</string>
+
+    <string name="ongoing_notification">Persistent notification</string>
+    <string name="ongoing_notification_desc">Show battery level in notification bar</string>
+
+    <string name="auto_start_on_boot">Auto-start on boot</string>
+    <string name="auto_start_on_boot_desc">Resume monitoring automatically after device reboot</string>
+
+    <string name="select_custom_sound">Select custom sound file</string>
+    <string name="browse">Browse</string>
+
+    <string name="quick_actions_title">Quick system settings shortcuts</string>
+    <string name="notification_settings">App notifications</string>
+    <string name="notification_settings_desc">Manage permissions and categories</string>
+    <string name="sound_settings">Sound and vibration</string>
+    <string name="sound_settings_desc">Volume, ringtones, system vibration</string>
+    <string name="battery_saver_settings">Battery saver</string>
+    <string name="battery_saver_settings_desc">Optimize background battery usage</string>
+    <string name="notification_access_settings">Notification access</string>
+    <string name="notification_access_settings_desc">Allow invasive (full-screen) notifications</string>
+
+<string name="settings_short">Settings</string>
+
+    <!-- Notifications -->
+    <string name="channel_ongoing_name">Battery status</string>
+    <string name="channel_ongoing_desc">Persistent notification with current battery level</string>
+    <string name="channel_test_name">Test</string>
+    <string name="channel_test_desc">Test notifications to verify sound and vibration</string>
+    <string name="channel_threshold_name">Threshold %1$d%%</string>
+    <string name="channel_threshold_desc" formatted="false">Notification at %1$d% battery</string>
+
+    <string name="notif_threshold_title">Battery at %1$d%% (%2$s)</string>
+    <string name="notif_threshold_body">Current level: %1$d%% · Estimated time: %2$s</string>
+    <string name="notif_ongoing_title">Battery: %s</string>
+    <string name="notif_ongoing_text">%1$d%% · %2$s remaining</string>
+    <string name="notif_test_title">Test notification</string>
+    <string name="notif_test_body">Threshold %1$d%% (%2$s)\n%3$s</string>
+    <string name="notif_test_silent">Sound: Silent</string>
+    <string name="notif_test_with_sound">Sound: With sound</string>
+
+    <!-- Full Screen Alert -->
+    <string name="alert_battery_low_title">LOW BATTERY!</string>
+    <string name="alert_battery_at">Battery at %d%%</string>
+    <string name="alert_battery_message">Connect charger to prevent device shutdown</string>
+    <string name="connect_charger">Connect charger</string>
+
+    <!-- Silent only -->
+    <string name="silent_only">Silent only</string>
+    <string name="silent">Silent</string>
+    <string name="with_sound">With sound</string>
+    <string name="persistent">Persistent</string>
+
+    <!-- Service -->
+    <string name="service_title">BatteryNotifier</string>
+    <string name="service_monitoring">Monitoring battery in background</string>
+</resources>
