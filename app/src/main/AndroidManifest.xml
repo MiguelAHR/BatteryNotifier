@@ -7,14 +7,27 @@
     <!-- Reagendar alarmas tras reinicio o cambio de zona horaria -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
-    <!-- Alarmas exactas para notificaciones en el porcentaje exacto -->
-    <uses-permission
-        android:name="android.permission.SCHEDULE_EXACT_ALARM"
-        android:maxSdkVersion="32" />
+    <!-- Alarmas exactas para notificaciones en el porcentaje exacto.
+         Se declaran ambas: en API 33+ el sistema usa USE_EXACT_ALARM
+         y la app aparece en el acceso especial "Alarmas y recordatorios". -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+
+    <!-- Notificaciones de pantalla completa (Invasiva 1 y 3, API 34+).
+         Sin este permiso la app no aparece en la lista del sistema
+         y el full-screen intent se degrada a notificación normal. -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 
     <!-- Vibración en notificaciones críticas -->
     <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- Servicio en primer plano (monitoreo continuo) -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+
+    <!-- Excluir a la app de la optimización de batería (Doze / ahorro),
+         para que las alertas invasivas lleguen a tiempo -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
     <!-- Leer estadísticas de batería (para API 29+) -->
     <uses-permission android:name="android.permission.BATTERY_STATS" />

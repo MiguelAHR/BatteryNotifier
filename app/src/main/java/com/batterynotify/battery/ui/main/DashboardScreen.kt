@@ -130,6 +130,9 @@ fun DashboardScreen(
         ) {
             Header(state, zone, onOpenSettings)
 
+            // Aviso de permisos faltantes (si los hay)
+            PermissionsBanner()
+
             // Tarjeta principal de nivel de batería
             BatteryStatusCard(level, zone, pulseAlpha)
 
@@ -175,6 +178,71 @@ private fun Header(state: BatteryUiState, zone: TimeZone, onOpenSettings: () -> 
                 contentDescription = stringResource(R.string.settings_open),
                 tint = OnSurfaceLight
             )
+        }
+    }
+}
+
+@Composable
+private fun PermissionsBanner() {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    // Se recalcula en cada recomposición para reflejar cambios hechos en Ajustes
+    val notificationsOk =
+        com.batterynotify.battery.ui.permissions.PermissionsHelper.areNotificationsGranted(context)
+    val exactAlarmsOk =
+        com.batterynotify.battery.ui.permissions.PermissionsHelper.canScheduleExactAlarms(context)
+    val batteryOptOk =
+        com.batterynotify.battery.ui.permissions.PermissionsHelper.isIgnoringBatteryOptimizations(context)
+
+    if (notificationsOk && exactAlarmsOk && batteryOptOk) return
+
+    NeonCard(accent = NeonRed) {
+        Text(
+            text = stringResource(R.string.permissions_missing_title),
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = NeonRed
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = stringResource(R.string.permissions_missing_desc),
+            style = MaterialTheme.typography.bodySmall,
+            color = OnSurfaceVariantLight
+        )
+        Spacer(Modifier.height(12.dp))
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (!notificationsOk) {
+                androidx.compose.material3.OutlinedButton(
+                    onClick = {
+                        com.batterynotify.battery.ui.permissions.PermissionsHelper
+                            .openAppNotificationSettings(context)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = stringResource(R.string.grant_notifications))
+                }
+            }
+            if (!exactAlarmsOk) {
+                androidx.compose.material3.OutlinedButton(
+                    onClick = {
+                        com.batterynotify.battery.ui.permissions.PermissionsHelper
+                            .openExactAlarmSettings(context)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = stringResource(R.string.grant_exact_alarms))
+                }
+            }
+            if (!batteryOptOk) {
+                androidx.compose.material3.OutlinedButton(
+                    onClick = {
+                        com.batterynotify.battery.ui.permissions.PermissionsHelper
+                            .requestIgnoreBatteryOptimizations(context)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = stringResource(R.string.grant_battery_whitelist))
+                }
+            }
         }
     }
 }

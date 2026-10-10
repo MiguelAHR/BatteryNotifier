@@ -82,7 +82,13 @@
     <string name="notification_access_settings">Acceso a notificaciones</string>
     <string name="notification_access_settings_desc">Permitir notificaciones invasivas (pantalla completa)</string>
 
-<string name="settings_short">Ajustes</string>
+    <string name="settings_short">Ajustes</string>
+
+    <string name="permissions_missing_title">Faltan permisos</string>
+    <string name="permissions_missing_desc">Sin estos permisos las alertas pueden no llegar a tiempo, sobre todo con el ahorro de batería activado.</string>
+    <string name="grant_notifications">Permitir notificaciones</string>
+    <string name="grant_exact_alarms">Permitir alarmas exactas</string>
+    <string name="grant_battery_whitelist">Excluir del ahorro de batería</string>
 
     <!-- Notifications -->
     <string name="channel_ongoing_name">Estado de batería</string>

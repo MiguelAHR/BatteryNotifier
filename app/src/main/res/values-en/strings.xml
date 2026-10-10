@@ -82,7 +82,13 @@
     <string name="notification_access_settings">Notification access</string>
     <string name="notification_access_settings_desc">Allow invasive (full-screen) notifications</string>
 
-<string name="settings_short">Settings</string>
+    <string name="settings_short">Settings</string>
+
+    <string name="permissions_missing_title">Missing permissions</string>
+    <string name="permissions_missing_desc">Without these permissions alerts may arrive late, especially with battery saver on.</string>
+    <string name="grant_notifications">Allow notifications</string>
+    <string name="grant_exact_alarms">Allow exact alarms</string>
+    <string name="grant_battery_whitelist">Exclude from battery optimization</string>
 
     <!-- Notifications -->
     <string name="channel_ongoing_name">Battery status</string>

@@ -2,11 +2,13 @@ package com.batterynotify.battery.ui.permissions
 
 import android.Manifest
 import android.app.AlarmManager
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.os.PowerManager
 import android.provider.Settings
 import androidx.core.content.ContextCompat
 
@@ -14,6 +16,8 @@ import androidx.core.content.ContextCompat
  * Centraliza la gestión de permisos de la app:
  * - Notificaciones (runtime en API 33+)
  * - Alarmas exactas (API 31+)
+ * - Pantalla completa / full-screen intent (API 34+)
+ * - Exclusión de optimización de batería (Doze / ahorro)
  * - Accesos directos a los ajustes del sistema
  */
 object PermissionsHelper {
@@ -33,7 +37,7 @@ object PermissionsHelper {
                 Manifest.permission.POST_NOTIFICATIONS
             ) == PackageManager.PERMISSION_GRANTED
         }
-        return context.getSystemService(android.app.NotificationManager::class.java)
+        return context.getSystemService(NotificationManager::class.java)
             ?.areNotificationsEnabled() == true
     }
 
@@ -47,6 +51,17 @@ object PermissionsHelper {
         }
     }
 
+    /**
+     * Indica si la app está excluida de la optimización de batería.
+     * Sin esto, en modo ahorro / Doze las alertas invasivas pueden
+     * retrasarse varios minutos.
+     */
+    fun isIgnoringBatteryOptimizations(context: Context): Boolean {
+        val powerManager = context.getSystemService(PowerManager::class.java)
+            ?: return true
+        return powerManager.isIgnoringBatteryOptimizations(context.packageName)
+    }
+
     /** Abre el ajuste del sistema para permitir alarmas exactas. */
     fun openExactAlarmSettings(context: Context) {
         try {
@@ -58,6 +73,26 @@ object PermissionsHelper {
                 )
             }
         } catch (_: Exception) {
+        }
+    }
+
+    /**
+     * Pide al sistema excluir a la app de la optimización de batería.
+     * Abre el diálogo del sistema (requiere REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).
+     */
+    fun requestIgnoreBatteryOptimizations(context: Context) {
+        try {
+            if (isIgnoringBatteryOptimizations(context)) return
+            context.startActivity(
+                Intent(
+                    Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                    Uri.parse("package:${context.packageName}")
+                ).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+            )
+        } catch (_: Exception) {
+            openBatterySaverSettings(context)
         }
     }
 
