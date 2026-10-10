@@ -60,15 +60,12 @@ object SoundPickerHelper {
         }
     }
 
-    /** Reproduce una vista previa corta del tono indicado. */
+    /**
+     * Reproduce una vista previa corta del tono indicado.
+     * Delega en [SoundPreviewPlayer]: detiene cualquier preview
+     * anterior y se auto-detiene a los pocos segundos.
+     */
     fun playPreview(context: Context, uriString: String) {
-        try {
-            val ringtone = RingtoneManager.getRingtone(
-                context,
-                Uri.parse(uriString)
-            ) ?: return
-            if (!ringtone.isPlaying) ringtone.play()
-        } catch (_: Exception) {
-        }
+        SoundPreviewPlayer.play(context, uriString)
     }
 }

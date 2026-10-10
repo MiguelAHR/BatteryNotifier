@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.VolumeOff
 import androidx.compose.material3.Card
@@ -27,18 +28,18 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.batterynotify.battery.R
 import com.batterynotify.battery.data.sound.SoundPickerHelper
+import com.batterynotify.battery.data.sound.SoundPreviewPlayer
 import com.batterynotify.battery.data.sound.SystemSound
 import com.batterynotify.battery.domain.model.SoundType
-import kotlinx.coroutines.launch
 
 @Composable
 fun SoundPickerDialog(
@@ -48,9 +49,9 @@ fun SoundPickerDialog(
     onDismiss: () -> Unit = {}
 ) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     var systemSounds by remember { mutableStateOf<List<SystemSound>>(emptyList()) }
     var loadingSounds by remember { mutableStateOf(false) }
+    val playingUri by SoundPreviewPlayer.playingUri.collectAsStateWithLifecycle()
 
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
@@ -126,6 +127,7 @@ fun SoundPickerDialog(
                 )
                 systemSounds.take(15).forEach { sound ->
                     val isCurrentCustom = currentType == SoundType.CUSTOM && currentUri == sound.uri
+                    val isPlayingThis = playingUri == sound.uri
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(
@@ -136,7 +138,7 @@ fun SoundPickerDialog(
                             }
                         ),
                         onClick = {
-                            SoundPickerHelper.playPreview(context, sound.uri)
+                            // Tocar la fila solo SELECCIONA el tono (sin reproducir).
                             onChange(SoundType.CUSTOM, sound.uri)
                         }
                     ) {
@@ -155,14 +157,22 @@ fun SoundPickerDialog(
                             )
                             IconButton(
                                 onClick = {
-                                    scope.launch {
-                                        SoundPickerHelper.playPreview(context, sound.uri)
-                                    }
+                                    SoundPreviewPlayer.toggle(context, sound.uri)
                                 }
                             ) {
                                 Icon(
-                                    imageVector = Icons.Filled.PlayArrow,
-                                    contentDescription = stringResource(R.string.tap_to_preview),
+                                    imageVector = if (isPlayingThis) {
+                                        Icons.Filled.Pause
+                                    } else {
+                                        Icons.Filled.PlayArrow
+                                    },
+                                    contentDescription = stringResource(
+                                        if (isPlayingThis) {
+                                            R.string.stop_preview
+                                        } else {
+                                            R.string.tap_to_preview
+                                        }
+                                    ),
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
