@@ -79,8 +79,8 @@
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
                 <action android:name="android.intent.action.TIME_SET" />
                 <action android:name="android.intent.action.TIMEZONE_CHANGED" />
-                <!-- También escuchar cambios de estado de batería -->
-                <action android:name="android.intent.action.BATTERY_CHANGED" />
+                <!-- Cambios de alimentación (BATTERY_CHANGED es sticky y solo
+                     funciona con registerReceiver, no declarado aquí) -->
                 <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
                 <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
             </intent-filter>

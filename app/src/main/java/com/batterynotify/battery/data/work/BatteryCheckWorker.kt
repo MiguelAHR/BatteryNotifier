@@ -34,7 +34,7 @@ class BatteryCheckWorker(
             if (battery.percentage < 0) return Result.success()
 
             BatteryThresholdEngine(appContext, SettingsRepository(appContext))
-                .onBatteryUpdate(battery.percentage, battery.isCharging)
+                .onBatteryUpdate(battery.percentage, battery.isCharging, battery.timeRemainingMs)
 
             Result.success()
         } catch (_: Exception) {

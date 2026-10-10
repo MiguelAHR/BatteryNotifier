@@ -9,11 +9,9 @@ import com.batterynotify.battery.data.settings.SettingsRepository
 import com.batterynotify.battery.domain.model.BatterySettings
 import com.batterynotify.battery.domain.model.LevelStyle
 import com.batterynotify.battery.domain.model.ThresholdConfig
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 
 /**
  * Motor que detecta umbrales de batería ya superados y dispara sus avisos.
@@ -38,8 +36,16 @@ class BatteryThresholdEngine(
         val triggeredThresholds: List<Int>
     )
 
-    fun onBatteryUpdate(percentage: Int, isCharging: Boolean) {
-        val settings = getSettingsSync()
+    /**
+     * Suspend: lee los ajustes sin bloquear el hilo que llama
+     * (antes usaba runBlocking y podía congelar la UI en cada broadcast).
+     */
+    suspend fun onBatteryUpdate(
+        percentage: Int,
+        isCharging: Boolean,
+        timeRemainingMs: Long? = null
+    ) {
+        val settings = settingsRepository.settings.first()
 
         val enabledThresholds = settings.thresholds
             .filter { it.enabled }
@@ -64,6 +70,12 @@ class BatteryThresholdEngine(
             emptyList()
         }
 
+        // Si las notificaciones están apagadas, rearmar todo para que al
+        // reactivarlas vuelvan a avisar de los umbrales superados.
+        if (!settings.notificationsEnabled) {
+            ThresholdNotifyTracker.disarmAll()
+        }
+
         // Detección por NIVEL (no solo por cruce): si la batería ya está
         // por debajo de un umbral habilitado y aún no se avisó en este
         // ciclo, se avisa. Cubre app abierta tarde, broadcasts perdidos,
@@ -73,7 +85,7 @@ class BatteryThresholdEngine(
             for (threshold in currentActiveThresholds) {
                 val config = settings.configFor(threshold) ?: continue
                 if (ThresholdNotifyTracker.shouldNotify(threshold)) {
-                    notifyNow(threshold, config, settings, percentage, false)
+                    notifyNow(config, settings, percentage, timeRemainingMs)
                 } else if (config.alertType == com.batterynotify.battery.domain.model.AlertType.INVASIVE_3 &&
                     lastKnownPercentage >= 0 && percentage < lastKnownPercentage
                 ) {
@@ -117,20 +129,18 @@ class BatteryThresholdEngine(
 
     /** Muestra la notificación del umbral en este instante. */
     private fun notifyNow(
-        threshold: Int,
         config: ThresholdConfig,
         settings: BatterySettings,
         percentage: Int,
-        isCharging: Boolean
+        timeRemainingMs: Long? = null
     ) {
-        if (isCharging) return
         if (!settings.notificationsEnabled || !config.enabled) return
         if (!Notifications.areEnabled(context)) return
 
         val level = com.batterynotify.battery.domain.model.BatteryLevel(
             percentage = percentage,
             isCharging = false,
-            timeRemainingMs = null,
+            timeRemainingMs = timeRemainingMs,
             levelStyle = LevelStyle.fromPercentage(percentage)
         )
         Notifications.showThreshold(
@@ -163,12 +173,6 @@ class BatteryThresholdEngine(
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-    }
-
-    private fun getSettingsSync(): BatterySettings {
-        return runBlocking(Dispatchers.IO) {
-            settingsRepository.settings.first()
-        }
     }
 
     companion object {

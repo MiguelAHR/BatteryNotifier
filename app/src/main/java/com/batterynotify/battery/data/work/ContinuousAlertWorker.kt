@@ -104,7 +104,8 @@ class ContinuousAlertWorker(
 
         /** Cancela todas las cadenas de alertas continuas. */
         fun cancelAll(context: Context) {
-            WorkManager.getInstance(context).cancelAllWorkByTag("continuous_alert")
+            // Nota: los tags reales son "continuous_alert_<umbral>", por eso
+            // se cancela uno por uno en vez de por tag genérico.
             for (threshold in com.batterynotify.battery.domain.model.LevelStyle.ALL_THRESHOLDS) {
                 cancel(context, threshold)
             }

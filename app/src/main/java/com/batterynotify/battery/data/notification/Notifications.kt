@@ -54,7 +54,14 @@ object Notifications {
         if (!settings.notificationsEnabled || !config.enabled) return
         if (!areEnabled(context)) return
 
-        val channelId = NotificationChannels.channelIdFor(config.threshold, config.alertType, config.soundType, config.soundUri)
+        val channelId = NotificationChannels.channelIdFor(
+            config.threshold,
+            config.alertType,
+            config.soundType,
+            config.soundUri,
+            config.vibrate,
+            config.priority
+        )
         NotificationChannels.createAll(context, settings.thresholds)
 
         val styleName = when (level.levelStyle) {
@@ -172,7 +179,14 @@ object Notifications {
             ?: settings.thresholds.firstOrNull { it.enabled }
             ?: return
 
-        val channelId = NotificationChannels.channelIdFor(config.threshold, config.alertType, config.soundType, config.soundUri)
+        val channelId = NotificationChannels.channelIdFor(
+            config.threshold,
+            config.alertType,
+            config.soundType,
+            config.soundUri,
+            config.vibrate,
+            config.priority
+        )
         NotificationChannels.createAll(context, settings.thresholds)
 
         val styleName = when {

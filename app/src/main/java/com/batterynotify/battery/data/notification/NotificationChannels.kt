@@ -37,10 +37,21 @@ object NotificationChannels {
     }
 
     /**
-     * Genera el ID del canal incluyendo el tipo de alerta.
-     * Mantiene compatibilidad con la versión anterior.
+     * Genera el ID del canal incluyendo tipo de alerta, sonido, vibración
+     * y prioridad.
+     *
+     * Los canales son inmutables en Android: si la vibración o la
+     * prioridad no formaran parte del ID, cambiar esos ajustes en la
+     * app no tendría ningún efecto real.
      */
-    fun channelIdFor(threshold: Int, alertType: AlertType, soundType: SoundType, soundUri: String): String {
+    fun channelIdFor(
+        threshold: Int,
+        alertType: AlertType,
+        soundType: SoundType,
+        soundUri: String,
+        vibrate: Boolean = true,
+        priority: NotificationPriority = NotificationPriority.NORMAL
+    ): String {
         val soundKey = when (soundType) {
             SoundType.DEFAULT -> "default"
             SoundType.SILENT -> "silent"
@@ -51,7 +62,14 @@ object NotificationChannels {
             AlertType.INVASIVE_1 -> "i1"
             AlertType.INVASIVE_3 -> "i3"
         }
-        return "$THRESHOLD_PREFIX.$threshold.$alertKey.$soundKey"
+        val vibKey = if (vibrate) "v1" else "v0"
+        val priKey = when (priority) {
+            NotificationPriority.LOW -> "p0"
+            NotificationPriority.NORMAL -> "p1"
+            NotificationPriority.HIGH -> "p2"
+            NotificationPriority.MAX -> "p3"
+        }
+        return "$THRESHOLD_PREFIX.$threshold.$alertKey.$soundKey.$vibKey.$priKey"
     }
 
     /** Crea todos los canales necesarios para las notificaciones de batería. */
@@ -96,7 +114,14 @@ object NotificationChannels {
             )
 
             NotificationChannel(
-                channelIdFor(config.threshold, config.alertType, config.soundType, config.soundUri),
+                channelIdFor(
+                    config.threshold,
+                    config.alertType,
+                    config.soundType,
+                    config.soundUri,
+                    config.vibrate,
+                    config.priority
+                ),
                 context.getString(R.string.channel_threshold_name, config.threshold),
                 importance
             ).apply {

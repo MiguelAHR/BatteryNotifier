@@ -53,7 +53,13 @@ class BatteryMonitoringService : Service(), LifecycleOwner {
         val initialInfo = batteryManager?.getCurrentBatteryLevel()
         initialInfo?.let { info ->
             if (info.percentage >= 0) {
-                thresholdEngine?.onBatteryUpdate(info.percentage, info.isCharging)
+                scope.launch {
+                    thresholdEngine?.onBatteryUpdate(
+                        info.percentage,
+                        info.isCharging,
+                        info.timeRemainingMs
+                    )
+                }
             }
         }
 
@@ -61,7 +67,11 @@ class BatteryMonitoringService : Service(), LifecycleOwner {
         scope.launch {
             batteryManager?.batteryLevel?.collect { info ->
                 if (info != null && info.percentage >= 0) {
-                    thresholdEngine?.onBatteryUpdate(info.percentage, info.isCharging)
+                    thresholdEngine?.onBatteryUpdate(
+                        info.percentage,
+                        info.isCharging,
+                        info.timeRemainingMs
+                    )
                 }
             }
         }

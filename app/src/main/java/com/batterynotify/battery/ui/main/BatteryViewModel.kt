@@ -60,7 +60,11 @@ class BatteryViewModel(
         viewModelScope.launch {
             batteryManager.batteryLevel.collect { info ->
                 if (info != null && info.percentage >= 0) {
-                    thresholdEngine.onBatteryUpdate(info.percentage, info.isCharging)
+                    thresholdEngine.onBatteryUpdate(
+                        info.percentage,
+                        info.isCharging,
+                        info.timeRemainingMs
+                    )
                 }
             }
         }
