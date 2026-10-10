@@ -76,7 +76,11 @@ import kotlinx.coroutines.launch
 @Composable
 fun SettingsRoute(
     onBack: () -> Unit,
-    viewModel: SettingsViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    viewModel: SettingsViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+        factory = com.batterynotify.battery.ui.SettingsViewModelFactory(
+            androidx.compose.ui.platform.LocalContext.current
+        )
+    )
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 

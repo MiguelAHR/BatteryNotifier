@@ -72,8 +72,16 @@ import kotlin.time.ExperimentalTime
 fun DashboardRoute(
     onOpenSettings: () -> Unit = {},
     zone: TimeZone = TimeZone.currentSystemDefault(),
-    viewModel: BatteryViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    viewModel: BatteryViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+        factory = com.batterynotify.battery.ui.BatteryViewModelFactory(
+            androidx.compose.ui.platform.LocalContext.current
+        )
+    )
 ) {
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    androidx.compose.runtime.LaunchedEffect(lifecycleOwner) {
+        viewModel.startMonitoring(lifecycleOwner)
+    }
     val state by viewModel.state.collectAsStateWithLifecycle()
     DashboardScreen(
         state = state,

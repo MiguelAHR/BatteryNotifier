@@ -59,8 +59,11 @@ class FullScreenAlertActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setShowWhenLocked(true)
-        setTurnScreenOn(true)
+        // setShowWhenLocked/setTurnScreenOn solo existen desde API 27 (minSdk = 26)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(true)
+            setTurnScreenOn(true)
+        }
         setContent {
             BatteryTheme {
                 val threshold = intent.getIntExtra("THRESHOLD", 0)

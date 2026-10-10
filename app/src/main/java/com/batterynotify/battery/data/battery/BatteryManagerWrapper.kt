@@ -43,8 +43,15 @@ class BatteryManagerWrapper(val context: Context) {
             addAction(Intent.ACTION_POWER_DISCONNECTED)
         }
         
-        // Registrar receptor para recibir sticky broadcast de batería
-        val stickyIntent = context.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        // Registrar receptor para recibir sticky broadcast de batería.
+        // RECEIVER_NOT_EXPORTED solo existe desde API 33: en versiones
+        // anteriores se usa la sobrecarga sin flags.
+        val stickyIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            context.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            @Suppress("UnspecifiedRegisterReceiverFlag")
+            context.registerReceiver(receiver, filter)
+        }
         if (stickyIntent != null) {
             receiver.onReceive(context, stickyIntent)
         }

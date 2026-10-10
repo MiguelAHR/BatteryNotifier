@@ -4,6 +4,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import com.batterynotify.battery.ui.main.DashboardRoute
 import com.batterynotify.battery.ui.permissions.PermissionsHelper
 import com.batterynotify.battery.ui.settings.SettingsRoute
@@ -16,7 +20,6 @@ import kotlinx.coroutines.cancel
 class MainActivity : ComponentActivity() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
-    private var showSettings = false
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -30,6 +33,7 @@ class MainActivity : ComponentActivity() {
         requestRequiredPermissions()
         setContent {
             BatteryTheme {
+                var showSettings by rememberSaveable { mutableStateOf(false) }
                 if (showSettings) {
                     SettingsRoute(onBack = { showSettings = false })
                 } else {
