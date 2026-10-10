@@ -68,6 +68,9 @@
 
     <string name="select_custom_sound">Select custom sound file</string>
     <string name="browse">Browse</string>
+    <string name="system_sounds">System sounds</string>
+    <string name="tap_to_preview">Tap to preview</string>
+    <string name="selected_file">File: %1$s</string>
 
     <string name="quick_actions_title">Quick system settings shortcuts</string>
     <string name="notification_settings">App notifications</string>

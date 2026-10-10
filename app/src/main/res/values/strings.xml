@@ -68,6 +68,9 @@
 
     <string name="select_custom_sound">Seleccionar archivo de sonido</string>
     <string name="browse">Examinar</string>
+    <string name="system_sounds">Tonos del sistema</string>
+    <string name="tap_to_preview">Toca para escuchar</string>
+    <string name="selected_file">Archivo: %1$s</string>
 
     <string name="quick_actions_title">Accesos rápidos a ajustes del sistema</string>
     <string name="notification_settings">Notificaciones de la app</string>
