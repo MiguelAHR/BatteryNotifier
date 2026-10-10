@@ -4,25 +4,19 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import com.batterynotify.battery.data.notification.Notifications
 import com.batterynotify.battery.data.settings.SettingsRepository
 import com.batterynotify.battery.domain.model.BatterySettings
 import com.batterynotify.battery.domain.model.LevelStyle
 import com.batterynotify.battery.domain.model.ThresholdConfig
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 
 /**
- * Motor que detecta cruces de umbrales de batería y programa alarmas exactas.
+ * Motor que detecta umbrales de batería ya superados y dispara sus avisos.
  */
 class BatteryThresholdEngine(
     private val context: Context,
@@ -47,9 +41,11 @@ class BatteryThresholdEngine(
     fun onBatteryUpdate(percentage: Int, isCharging: Boolean) {
         val settings = getSettingsSync()
 
-        val currentActiveThresholds = settings.thresholds
+        val enabledThresholds = settings.thresholds
             .filter { it.enabled }
             .map { it.threshold }
+
+        val currentActiveThresholds = enabledThresholds
             .filter { percentage <= it }
             .sortedDescending()
 
@@ -62,20 +58,40 @@ class BatteryThresholdEngine(
         }
 
         val newlyCrossedUp = if (lastKnownPercentage >= 0 && isCharging && !lastKnownCharging) {
-            settings.thresholds
-                .filter { it.enabled }
-                .map { it.threshold }
+            enabledThresholds
                 .filter { lastKnownPercentage <= it && percentage > it }
         } else {
             emptyList()
         }
 
-        for (threshold in newlyCrossedDown) {
-            val config = settings.configFor(threshold) ?: continue
-            // El cruce YA ocurrió: notificar al momento (con sonido/vibración).
-            // Además se programa la alarma exacta como respaldo.
-            notifyNow(threshold, config, settings, percentage, isCharging)
-            scheduleExactNotification(threshold, config, percentage, isCharging)
+        // Detección por NIVEL (no solo por cruce): si la batería ya está
+        // por debajo de un umbral habilitado y aún no se avisó en este
+        // ciclo, se avisa. Cubre app abierta tarde, broadcasts perdidos,
+        // saltos de porcentaje y reinicios del proceso.
+        // El candado compartido evita duplicados entre ViewModel y servicio.
+        if (settings.notificationsEnabled && !isCharging) {
+            for (threshold in currentActiveThresholds) {
+                val config = settings.configFor(threshold) ?: continue
+                if (ThresholdNotifyTracker.shouldNotify(threshold)) {
+                    notifyNow(threshold, config, settings, percentage, false)
+                } else if (config.alertType == com.batterynotify.battery.domain.model.AlertType.INVASIVE_3 &&
+                    lastKnownPercentage >= 0 && percentage < lastKnownPercentage
+                ) {
+                    // Invasiva 3: actualiza la continua con cada 1% menos
+                    Notifications.showContinuousLevel(context, threshold, percentage)
+                }
+            }
+        }
+
+        // Rearmar los umbrales que quedaron por encima (próximo ciclo)
+        for (threshold in enabledThresholds) {
+            if (percentage > threshold) {
+                ThresholdNotifyTracker.disarm(threshold)
+            }
+        }
+        // Los umbrales deshabilitados siempre se rearman
+        for (cfg in settings.thresholds) {
+            if (!cfg.enabled) ThresholdNotifyTracker.disarm(cfg.threshold)
         }
 
         for (threshold in newlyCrossedUp) {
@@ -123,63 +139,6 @@ class BatteryThresholdEngine(
             config = config,
             settings = settings
         )
-    }
-
-    private fun scheduleExactNotification(
-        threshold: Int,
-        config: ThresholdConfig,
-        currentPercentage: Int,
-        isCharging: Boolean
-    ) {
-        if (isCharging) return
-
-        val triggerAt = estimateThresholdTime(currentPercentage, threshold)
-
-        val requestCode = REQUEST_THRESHOLD_BASE + threshold
-        val action = "${BatteryThresholdReceiver.ACTION_THRESHOLD}.$threshold"
-
-        setExactAlarm(
-            triggerAt = triggerAt,
-            requestCode = requestCode,
-            action = action,
-            threshold = threshold
-        )
-    }
-
-    private fun estimateThresholdTime(currentPercentage: Int, targetThreshold: Int): Instant {
-        val percentDiff = currentPercentage - targetThreshold
-        val estimatedMinutes = (percentDiff * 12.0).toLong()
-        val estimatedMs = estimatedMinutes * 60L * 1000L
-        val delayMs = estimatedMs.coerceAtLeast(60_000L)
-        return Instant.fromEpochMilliseconds(Clock.System.now().toEpochMilliseconds() + delayMs)
-    }
-
-    private fun setExactAlarm(
-        triggerAt: Instant,
-        requestCode: Int,
-        action: String,
-        threshold: Int
-    ) {
-        alarmManager ?: return
-
-        val canScheduleExact = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            alarmManager.canScheduleExactAlarms()
-        } else {
-            true
-        }
-
-        val operation = pendingIntent(requestCode, action)
-        val triggerAtMs = triggerAt.toEpochMilliseconds()
-
-        try {
-            if (canScheduleExact) {
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMs, operation)
-            } else {
-                alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMs, operation)
-            }
-        } catch (e: SecurityException) {
-            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMs, operation)
-        }
     }
 
     fun cancelThresholdAlarm(threshold: Int) {

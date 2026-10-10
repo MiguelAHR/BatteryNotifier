@@ -68,8 +68,9 @@ class BatteryThresholdReceiver : BroadcastReceiver() {
                 }
 
                 if (settings.notificationsEnabled && Notifications.areEnabled(appContext) && config.enabled) {
-                    // Verificar que el nivel actual sigue estando por debajo del umbral
-                    if (level.percentage <= threshold) {
+                    // Verificar que el nivel actual sigue estando por debajo del umbral.
+                    // El candado evita duplicar un aviso que el motor ya mostró.
+                    if (level.percentage <= threshold && ThresholdNotifyTracker.shouldNotify(threshold)) {
                         Notifications.showThreshold(
                             context = appContext,
                             level = level,

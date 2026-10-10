@@ -35,6 +35,13 @@ class BootReceiver : BroadcastReceiver() {
                         // Solo reanudar si el usuario lo autorizó
                         if (!settings.autoStartOnBoot || !settings.notificationsEnabled) return@launch
 
+                        // Revisión periódica (segura en segundo plano tras reinicio)
+                        try {
+                            com.batterynotify.battery.data.work.BatteryCheckWorker
+                                .enqueuePeriodic(appContext)
+                        } catch (_: Exception) {
+                        }
+
                         val batteryManager = BatteryManagerWrapper(appContext)
                         val batteryInfo = batteryManager.getCurrentBatteryLevel()
                         rescheduleThresholds(appContext, settings, batteryInfo)
