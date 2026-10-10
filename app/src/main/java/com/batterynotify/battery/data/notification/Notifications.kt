@@ -242,24 +242,54 @@ object Notifications {
         LevelStyle.EMERGENCY -> R.drawable.ic_battery_emergency
     }
 
-    fun scheduleContinuousAlerts(context: Context, threshold: Int) {
-        val alarmManager = context.getSystemService(AlarmManager::class.java) ?: return
+    /**
+     * Muestra o actualiza la notificación continua de un umbral Invasivo 3
+     * con el porcentaje actual. Es ongoing y solo alerta la primera vez.
+     */
+    fun showContinuousLevel(context: Context, threshold: Int, percentage: Int) {
+        if (!areEnabled(context)) return
 
-        val intent = Intent(context, BatteryThresholdReceiver::class.java).apply {
-            action = "${BatteryThresholdReceiver.ACTION_THRESHOLD}.$threshold.CONTINUOUS"
+        val style = LevelStyle.fromPercentage(percentage)
+        val styleName = when (style) {
+            LevelStyle.GREEN -> context.getString(R.string.level_green)
+            LevelStyle.WARNING -> context.getString(R.string.level_warning)
+            LevelStyle.CRITICAL -> context.getString(R.string.level_critical)
+            LevelStyle.EMERGENCY -> context.getString(R.string.level_emergency)
         }
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            CONTINUOUS_ID_BASE + threshold,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
 
-        alarmManager.setInexactRepeating(
-            AlarmManager.RTC_WAKEUP,
-            System.currentTimeMillis() + 5 * 60 * 1000L,
-            5 * 60 * 1000L,
-            pendingIntent
+        val title = context.getString(R.string.notif_threshold_title, threshold, styleName)
+        val body = context.getString(R.string.notif_threshold_body, percentage, "")
+
+        val notification = NotificationCompat.Builder(context, NotificationChannels.ONGOING)
+            .setSmallIcon(iconForStyle(style))
+            .setContentTitle(title)
+            .setContentText(body)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(body))
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
+            .setContentIntent(openAppIntent(context))
+            .build()
+
+        notify(context, CONTINUOUS_ID_BASE + threshold, notification)
+    }
+
+    fun cancelContinuousLevel(context: Context, threshold: Int) {
+        context.getSystemService(NotificationManager::class.java)
+            ?.cancel(CONTINUOUS_ID_BASE + threshold)
+    }
+
+    /**
+     * Programa la cadena de revisiones periódicas (WorkManager) para un
+     * umbral Invasivo 3. La cadena se detiene sola al cargar, al subir
+     * por encima del umbral o al deshabilitar el umbral.
+     */
+    fun scheduleContinuousAlerts(context: Context, threshold: Int) {
+        com.batterynotify.battery.data.work.ContinuousAlertWorker.enqueue(
+            context,
+            threshold,
+            com.batterynotify.battery.data.work.ContinuousAlertWorker.CHECK_INTERVAL_MINUTES
         )
     }
 
@@ -268,6 +298,7 @@ object Notifications {
         val alarmManager = context.getSystemService(AlarmManager::class.java)
         for (threshold in LevelStyle.ALL_THRESHOLDS) {
             manager?.cancel(CONTINUOUS_ID_BASE + threshold)
+            com.batterynotify.battery.data.work.ContinuousAlertWorker.cancel(context, threshold)
             if (alarmManager != null) {
                 val intent = Intent(context, BatteryThresholdReceiver::class.java).apply {
                     action = "${BatteryThresholdReceiver.ACTION_THRESHOLD}.$threshold.CONTINUOUS"

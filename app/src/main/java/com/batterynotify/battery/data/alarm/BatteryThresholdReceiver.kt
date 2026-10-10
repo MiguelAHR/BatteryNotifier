@@ -25,20 +25,48 @@ class BatteryThresholdReceiver : BroadcastReceiver() {
         val appContext = context.applicationContext
         val action = intent?.action ?: return
 
-        // Extraer el umbral del action: "batterynotify.action.THRESHOLD.20"
-        val threshold = action.split(".").lastOrNull()?.toIntOrNull() ?: return
+        // Extraer el umbral del action:
+        // - "batterynotify.action.THRESHOLD.20" (cruce de umbral)
+        // - "batterynotify.action.THRESHOLD.20.CONTINUOUS" (revisión continua heredada)
+        val parts = action.split(".")
+        val isContinuous = parts.lastOrNull() == "CONTINUOUS"
+        val threshold = if (isContinuous) {
+            parts.getOrNull(parts.size - 2)?.toIntOrNull() ?: return
+        } else {
+            parts.lastOrNull()?.toIntOrNull() ?: return
+        }
 
         CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
             try {
                 val settings = SettingsRepository(appContext).settings.first()
                 val batteryManager = BatteryManagerWrapper(appContext)
                 val batteryInfo = batteryManager.getCurrentBatteryLevel()
-                
+
                 // Convertir BatteryInfo a BatteryLevel del dominio
                 val level = toBatteryLevel(batteryInfo)
-                
+
                 val config = settings.configFor(threshold) ?: return@launch
-                
+
+                // Si está cargando, se cancelan las continuas y no se notifica
+                if (level.isCharging) {
+                    Notifications.cancelContinuousLevel(appContext, threshold)
+                    return@launch
+                }
+
+                if (isContinuous) {
+                    // Revisión continua (Invasiva 3): solo si sigue por debajo del umbral
+                    if (settings.notificationsEnabled && Notifications.areEnabled(appContext)
+                        && config.enabled
+                        && config.alertType == com.batterynotify.battery.domain.model.AlertType.INVASIVE_3
+                        && level.percentage in 0..threshold
+                    ) {
+                        Notifications.showContinuousLevel(appContext, threshold, level.percentage)
+                    } else {
+                        Notifications.cancelContinuousLevel(appContext, threshold)
+                    }
+                    return@launch
+                }
+
                 if (settings.notificationsEnabled && Notifications.areEnabled(appContext) && config.enabled) {
                     // Verificar que el nivel actual sigue estando por debajo del umbral
                     if (level.percentage <= threshold) {
