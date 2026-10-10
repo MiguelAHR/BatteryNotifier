@@ -79,10 +79,28 @@ fun DashboardRoute(
     )
 ) {
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    val context = androidx.compose.ui.platform.LocalContext.current
     androidx.compose.runtime.LaunchedEffect(lifecycleOwner) {
         viewModel.startMonitoring(lifecycleOwner)
     }
     val state by viewModel.state.collectAsStateWithLifecycle()
+    // Servicio persistente en segundo plano mientras el monitoreo esté activo.
+    // Sin esto, al cerrar la app los cruces de umbral dejan de detectarse.
+    androidx.compose.runtime.LaunchedEffect(state.settings.alwaysMonitoring) {
+        if (state.settings.alwaysMonitoring) {
+            try {
+                val intent = android.content.Intent(
+                    context.applicationContext,
+                    com.batterynotify.battery.data.battery.BatteryMonitoringService::class.java
+                )
+                androidx.core.content.ContextCompat.startForegroundService(
+                    context.applicationContext,
+                    intent
+                )
+            } catch (_: Exception) {
+            }
+        }
+    }
     DashboardScreen(
         state = state,
         zone = zone,

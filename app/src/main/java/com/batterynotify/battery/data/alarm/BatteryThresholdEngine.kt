@@ -72,6 +72,9 @@ class BatteryThresholdEngine(
 
         for (threshold in newlyCrossedDown) {
             val config = settings.configFor(threshold) ?: continue
+            // El cruce YA ocurrió: notificar al momento (con sonido/vibración).
+            // Además se programa la alarma exacta como respaldo.
+            notifyNow(threshold, config, settings, percentage, isCharging)
             scheduleExactNotification(threshold, config, percentage, isCharging)
         }
 
@@ -93,6 +96,32 @@ class BatteryThresholdEngine(
             isCharging = isCharging,
             activeThresholds = currentActiveThresholds,
             triggeredThresholds = newlyCrossedDown
+        )
+    }
+
+    /** Muestra la notificación del umbral en este instante. */
+    private fun notifyNow(
+        threshold: Int,
+        config: ThresholdConfig,
+        settings: BatterySettings,
+        percentage: Int,
+        isCharging: Boolean
+    ) {
+        if (isCharging) return
+        if (!settings.notificationsEnabled || !config.enabled) return
+        if (!Notifications.areEnabled(context)) return
+
+        val level = com.batterynotify.battery.domain.model.BatteryLevel(
+            percentage = percentage,
+            isCharging = false,
+            timeRemainingMs = null,
+            levelStyle = LevelStyle.fromPercentage(percentage)
+        )
+        Notifications.showThreshold(
+            context = context,
+            level = level,
+            config = config,
+            settings = settings
         )
     }
 

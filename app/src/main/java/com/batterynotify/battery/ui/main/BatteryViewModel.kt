@@ -31,6 +31,13 @@ class BatteryViewModel(
     private val _state = MutableStateFlow(BatteryUiState())
     val state = _state
 
+    // Motor de detección de cruces de umbral. Cada actualización de
+    // batería que llega del sistema pasa por aquí para disparar avisos.
+    private val thresholdEngine = com.batterynotify.battery.data.alarm.BatteryThresholdEngine(
+        batteryManager.context,
+        settingsRepository
+    )
+
     init {
         // Combinar battery level y settings
         viewModelScope.launch {
@@ -46,6 +53,16 @@ class BatteryViewModel(
                 .distinctUntilChanged()
                 .onEach { _state.value = it }
                 .launchIn(viewModelScope)
+        }
+
+        // Alimentar el motor de umbrales con cada lectura del sistema.
+        // Sin esto los cruces (ej. llegar al 20%) nunca se detectan.
+        viewModelScope.launch {
+            batteryManager.batteryLevel.collect { info ->
+                if (info != null && info.percentage >= 0) {
+                    thresholdEngine.onBatteryUpdate(info.percentage, info.isCharging)
+                }
+            }
         }
     }
 
